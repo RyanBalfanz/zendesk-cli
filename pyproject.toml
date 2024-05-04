@@ -1,0 +1,15 @@
+[project]
+name = "zendesk-cli"
+version = "0.1.0"
+description = "CLI for the Zendesk API"
+authors = [
+    { name = "Ryan Balfanz", email = "133278+RyanBalfanz@users.noreply.github.com" },
+]
+dependencies = []
+requires-python = "==3.12.*"
+readme = "README.md"
+license = { text = "MIT" }
+
+
+[tool.pdm]
+distribution = false
