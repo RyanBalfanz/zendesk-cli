@@ -1,3 +1,7 @@
+"""
+Provides a client for the Help Center API.
+"""
+
 import json
 import typing
 import urllib.parse
@@ -18,8 +22,10 @@ def urlopen_to_bytes(req: str | urllib.request.Request):
     """
     Read and return the response body as bytes for the HTTP or HTTPS request.
     """
+    # pylint: disable=import-outside-toplevel
     from http.client import HTTPResponse
 
+    # pylint: disable-next=line-too-long
     # For HTTP and HTTPS URLs, this function returns a http.client.HTTPResponse object slightly modified.
     response: HTTPResponse
     with urllib.request.urlopen(req) as response:
@@ -28,9 +34,17 @@ def urlopen_to_bytes(req: str | urllib.request.Request):
 
 @dataclass(frozen=True)
 class HelpCenterClient:
+    """
+    Represents a client for the Help Center API.
+    """
+
     base_url: str
 
     def get_articles(self, url: str | None = None):
+        """
+        Generator that yields articles from the Help Center API.
+        """
+
         def first_url(page_size: int = 100) -> str:
             return (
                 f"{ListArticlesOptionsBuilder().New(self.base_url).to_url()}?%s"
@@ -43,7 +57,6 @@ class HelpCenterClient:
         )
         data: dict[str, typing.Any] = json.loads(content)
         data_articles: list[dict[str, typing.Any]] = data["articles"]
-        for a in data_articles:
-            yield a
+        yield from data_articles
         if data["meta"]["has_more"] is True:
             yield from self.get_articles(data["links"]["next"])

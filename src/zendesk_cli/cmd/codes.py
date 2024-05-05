@@ -1,13 +1,17 @@
+"""
+Codes for the exit status of the program.
+"""
+
 import enum
 
 
 class ExitCode(enum.IntEnum):
     """
-    >>> ExitCode.Ok == 0
+    >>> ExitCode.OK == 0
     True
-    >>> ExitCode.Error == 1
+    >>> ExitCode.ERROR == 1
     True
     """
 
-    Ok = 0
-    Error = 1
+    OK = 0
+    ERROR = 1

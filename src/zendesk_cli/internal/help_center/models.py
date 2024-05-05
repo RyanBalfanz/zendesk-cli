@@ -1,9 +1,18 @@
+"""
+Models for the Help Center API.
+"""
+
+# pylint: disable=too-many-instance-attributes
 import typing
 from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
 class Article:
+    """
+    Represents an article in a Help Center.
+    """
+
     id: int
     title: str
     url: str
@@ -32,5 +41,9 @@ class Article:
 
     @staticmethod
     def get_field_names():
+        """
+        Returns the field names for the Article dataclass.
+        """
         # return Article.__annotations__.keys()
+        # pylint: disable=no-member
         return Article.__dataclass_fields__.keys()
