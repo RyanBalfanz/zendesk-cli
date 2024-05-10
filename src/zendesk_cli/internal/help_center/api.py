@@ -32,6 +32,53 @@ def urlopen_to_bytes(req: str | urllib.request.Request):
         return response.read()
 
 
+class Meta(typing.TypedDict):
+    has_more: bool
+    after_cursor: str
+    before_cursor: str
+
+
+class Links(typing.TypedDict):
+    next: str
+    prev: str
+
+
+class CursorPaginatedResponse(typing.TypedDict):
+    meta: Meta
+    links: Links
+
+
+# class Article(typing.TypedDict):
+#     author_id: int | None
+#     body: str | None
+#     comments_disabled: bool | None
+#     content_tag_ids: list[typing.Any] | None
+#     created_at: str | None
+#     draft: bool | None
+#     edited_at: str | None
+#     html_url: str | None
+#     id: int | None
+#     label_names: list[typing.Any] | None
+#     locale: str
+#     outdated: bool | None
+#     outdated_locales: list[typing.Any] | None
+#     permission_group_id: int
+#     position: int | None
+#     promoted: bool | None
+#     section_id: int | None
+#     source_locale: str | None
+#     title: str
+#     updated_at: str | None
+#     url: str | None
+#     user_segment_id: int
+#     vote_count: int | None
+#     vote_sum: int | None
+
+
+class ListArticlesResponse(CursorPaginatedResponse):
+    articles: list[dict[str, typing.Any]]
+
+
 @dataclass(frozen=True)
 class HelpCenterClient:
     """
@@ -55,8 +102,7 @@ class HelpCenterClient:
         content = urlopen_to_bytes(
             urllib.request.Request(url, headers={"Accept": "application/json"})
         )
-        data: dict[str, typing.Any] = json.loads(content)
-        data_articles: list[dict[str, typing.Any]] = data["articles"]
-        yield from data_articles
-        if data["meta"]["has_more"] is True:
-            yield from self.get_articles(data["links"]["next"])
+        data = ListArticlesResponse(json.loads(content))
+        yield from data["articles"]
+        if Meta(data["meta"])["has_more"] is True:
+            yield from self.get_articles(Links(data["links"])["next"])

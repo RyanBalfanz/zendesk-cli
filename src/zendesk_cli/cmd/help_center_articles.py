@@ -136,7 +136,10 @@ def main(argv: typing.Sequence[str] | None = None) -> int:
         w = JSONLOutputWriter()
     else:
         raise ValueError(f"Unknown format: {n.format}")
-    articles = (Article(**a) for a in HelpCenterClient(n.url).get_articles())
+    articles = (
+        Article(**{k: v for k, v in a.items() if k in Article.get_field_names()})
+        for a in HelpCenterClient(n.url).get_articles()
+    )
     w.write(sys.stdout, list(articles), fieldnames)
 
     return ExitCode.OK

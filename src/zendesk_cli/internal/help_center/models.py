@@ -13,31 +13,30 @@ class Article:
     Represents an article in a Help Center.
     """
 
-    id: int
-    title: str
-    url: str
-    html_url: str
-    author_id: int
-    comments_disabled: bool
-    draft: bool
-    promoted: bool
-    position: int
-    vote_sum: int
-    vote_count: int
-    section_id: int
-    created_at: str
-    updated_at: str
-    name: typing.Any
-    source_locale: str
+    author_id: int | None
+    body: str | None
+    comments_disabled: bool | None
+    content_tag_ids: list | None
+    created_at: str | None
+    draft: bool | None
+    edited_at: str | None
+    html_url: str | None
+    id: int | None
+    label_names: list | None
     locale: str
-    outdated: bool
-    outdated_locales: list
-    edited_at: str
-    user_segment_id: int
+    outdated: bool | None
+    outdated_locales: list | None
     permission_group_id: int
-    content_tag_ids: list
-    label_names: list
-    body: str
+    position: int | None
+    promoted: bool | None
+    section_id: int | None
+    source_locale: str | None
+    title: str
+    updated_at: str | None
+    url: str | None
+    user_segment_id: int
+    vote_count: int | None
+    vote_sum: int | None
 
     @staticmethod
     def get_field_names():
