@@ -3,7 +3,6 @@ Models for the Help Center API.
 """
 
 # pylint: disable=too-many-instance-attributes
-import typing
 from dataclasses import dataclass
 
 

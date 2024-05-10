@@ -2,17 +2,15 @@
 Provides a command-line interface to retrieve articles from a Zendesk Help Center.
 """
 
-import abc
 import argparse
-import csv
 import functools
-import json
 import os
 import sys
 import typing
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 
 from zendesk_cli.cmd.codes import ExitCode
+from zendesk_cli.cmd.writers import JSONLOutputWriter, TSVOutputWriter
 from zendesk_cli.internal.help_center.api import HelpCenterClient
 from zendesk_cli.internal.help_center.models import Article
 
@@ -36,61 +34,6 @@ def handle_broken_pipe_error[R, **P](f: typing.Callable[P, R]):
             sys.exit(ExitCode.ERROR)  # Python exits with error code 1 on EPIPE.
 
     return wrapper
-
-
-# pylint: disable-next=too-few-public-methods
-class OutputWriter(abc.ABC):
-    """
-    An abstract base class for output writers.
-    """
-
-    @abc.abstractmethod
-    # pylint: disable-next=missing-function-docstring
-    def write(
-        self,
-        fp: typing.IO[str],
-        articles: list[Article],
-        fieldnames: typing.Collection[str],
-    ): ...
-
-
-# pylint: disable-next=too-few-public-methods
-class TSVOutputWriter(OutputWriter):
-    """
-    An output writer described by the usual properties of Excel-generated TAB-delimited files.
-    """
-
-    def write(
-        self,
-        fp: typing.IO[str],
-        articles: list[Article],
-        fieldnames: typing.Collection[str],
-    ):
-        """Writes articles to a file-like object."""
-        writer = csv.DictWriter(fp, fieldnames, dialect=csv.excel_tab)
-        writer.writeheader()
-        for a in articles:
-            writer.writerow(
-                {k: v for k, v in asdict(a).items() if k in writer.fieldnames}
-            )
-
-
-# pylint: disable-next=too-few-public-methods
-class JSONLOutputWriter(OutputWriter):
-    """
-    An output writer that uses JSON Lines text file format (newline-delimited JSON).
-    """
-
-    def write(
-        self,
-        fp: typing.IO[str],
-        articles: list[Article],
-        fieldnames: typing.Collection[str],
-    ):
-        """Writes articles to a file-like object."""
-        for a in articles:
-            json.dump({k: v for k, v in asdict(a).items() if k in fieldnames}, fp)
-            fp.write("\n")
 
 
 @handle_broken_pipe_error
@@ -130,12 +73,13 @@ def main(argv: typing.Sequence[str] | None = None) -> int:
     else:
         fieldnames = Article.get_field_names()
 
-    if n.format == "tsv":
-        w = TSVOutputWriter()
-    elif n.format == "jsonl":
-        w = JSONLOutputWriter()
-    else:
-        raise ValueError(f"Unknown format: {n.format}")
+    match n.format:
+        case "tsv":
+            w = TSVOutputWriter()
+        case "jsonl":
+            w = JSONLOutputWriter()
+        case _:
+            raise ValueError(f"Unknown format: {n.format}")
     articles = (
         Article(**{k: v for k, v in a.items() if k in Article.get_field_names()})
         for a in HelpCenterClient(n.url).get_articles()
